@@ -1,0 +1,8 @@
+<div id="designer-layers">
+{% tmpl_loop layers %}
+  <div id="design-layer-{% tmpl_var id %}" class="designer-layer">
+    <span class="designer-layer-name">{% tmpl_var name %}</span>
+    <span class="designer-palette"></span>
+  </div>
+{% /tmpl_loop %}
+</div>

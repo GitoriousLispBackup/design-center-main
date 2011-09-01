@@ -1,0 +1,9 @@
+<div id="designer-picture-selector">
+  <ul>
+    {% tmpl_loop pictures %}
+    <li><a href="{% tmpl_var site-url %}/choose/{% tmpl_var id %}">
+      <img src="{% tmpl_var site-url %}/thumbnail/{% tmpl_var id %}"/>
+    </a></li>
+    {% /tmpl_loop %}
+  </ul>
+</div>
