@@ -32,11 +32,6 @@ set the colours of the layers, and see the resulting image.")
   (:export :start-server))
 (in-package :design-center)
 
-;; customize variables for HTML-TEMPLATE
-(setq *template-start-marker* "{%"
-      *template-end-marker* "%}"
-      *default-template-pathname* #p"./templates/")
-
 (defparameter *http-port* 4242
   "The port that Hunchentoot will be listening on.")
 
@@ -54,7 +49,7 @@ available for designing."
   (base-url "http://localhost/" :type string)
   (name "Site" :type string)
   (pictures (list) :type (or nil list))
-  (picture-load-path #p"./pictures/" :type pathname))
+  (picture-load-path (truename #p"./pictures/") :type pathname))
 
 (defvar *sites*
   (list)
@@ -74,7 +69,7 @@ available for designing."
   "List of pictures available for designing on all sites.")
 
 (defvar *picture-load-path*
-  #p"./pictures/"
+  (truename #p"./pictures/")
   "The path in which to search for pictures available for designing.")
 
 (defun register-picture (title path &optional (description ""))
@@ -102,22 +97,6 @@ in *PICTURES*"
   picture
   layer-colors)
 
-(defun get-session (site id)
-  (assoc id (site-sessions site)))
-
-(defun start-session (site ip-address picture)
-  (let ((id (random 300000)))
-    (setf (site-sessions site)
-	  (cons (list id (make-site-session :ip-address ip-address :picture picture))
-		(site-sessions site)))
-    id))
-
-(defun cleanup-sessions (site)
-  (setf (site-sessions site) (remove-if (lambda (x)
-					  (> (- (get-universal-time) (session-started-on x))
-					     (site-session-cleanup-time site)))
-					(site-sessions site))))
-
 (defun set-layer-color (session layer-index new-color)
   (setf (elt (session-layer-colors session) layer-index) new-color))
 
@@ -126,22 +105,28 @@ in *PICTURES*"
   )
 
 ;; Request handlers (a.k.a. views)
-(define-easy-handler (start-session :uri "/new") (pic)
-  (setf (content-type*) "text/html")
-  (fill-and-print-template #p"designer.html"))
+(define-easy-handler (new-design :uri "/") ()
+  (start-session)
+  (setf (session-value 'picture) nil)
+  (setf (session-value 'layer-colors) (list))
+  (setf (content-type*) "text/html"))
 
-(define-easy-handler (change-picture :uri "/choose") (session pic)
+(define-easy-handler (test-design-center :uri "/test") ()
+  (output-template #p"embedded-example.html" nil))
+
+(define-easy-handler (change-picture :uri "/choose") (pic)
   "Handler for changing which picture (and layers) are associated with the given session."
-  )
+  (start-session))
 
-(define-easy-handler (set-color :uri "/set") (session layer color)
+(define-easy-handler (set-color :uri "/set") (layer color)
   "Handler for setting the color of a layer that's associated with the given session."
-  )
+  (start-session))
 
-(define-easy-handler (session-image :uri "/image") (session)
+(define-easy-handler (generate-image :uri "/image") ()
   "Handler for loading and writing the picture/layers being used by the given session."
+  (start-session)
   (setf (content-type*) "image/png")
-  )
+)
 
 (define-easy-handler (thumbnail :uri "/thumbnail") (picture-id)
   "Handler that loads and resizes the base image of a picture."
@@ -151,4 +136,5 @@ in *PICTURES*"
   (load config-file :verbose t)
   (if *swank-enabled*
       (swank:create-server :port *swank-port* :dont-close t))
+  (reset-session-secret)
   (hunchentoot:start (make-instance 'hunchentoot:acceptor :port *http-port*)))
