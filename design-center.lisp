@@ -18,7 +18,7 @@
 (require 'quicklisp)
 (ql:quickload '("imago"
 		"hunchentoot"
-		"html-template"
+		"md5"
 		"swank"))
 
 (defpackage :design-center
@@ -28,8 +28,7 @@ layers which can be colourized and the user can select new pictures,
 set the colours of the layers, and see the resulting image.")
   (:use :common-lisp
 	:imago
-	:hunchentoot
-	:html-template)
+	:hunchentoot)
   (:export :start-server))
 (in-package :design-center)
 
