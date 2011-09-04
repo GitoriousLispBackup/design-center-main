@@ -1,17 +1,35 @@
 <link href="css/farbtastic.css" rel="stylesheet" />
 <link href="css/design-center.css" rel="stylesheet" />
-<title>Designer for {% tmpl_var designer-title %}</title>
-<div id="designer">
-  {% tmpl_include "picture-selector.html" %}
-  <h2 class="designer-name">{% tmpl_var picture-title %}</h2>
-  {% tmpl_if picture-description %}
-  <h3 class="designer-info">{% tmpl_var picture-description %}</h3>
-  {% /tmpl_if %}
-  {% tmpl_include "layers.html" %}
-  <div id="designer-image">
+<div id="design-center">
+  <div class="picture-selector">
+    <ul>
+      {% tmpl_loop pictures %}
+      <li><a href="{% tmpl_var site-url %}/choose/{% tmpl_var id %}">
+	  <img src="{% tmpl_var site-url %}/thumbnail/{% tmpl_var id %}"/>
+      </a></li>
+      {% /tmpl_loop %}
+    </ul>
+  </div>
+  <div class="picture-info">
+    <h2></h2>
+    <h3></h3>
+  </div>
+  <div class="layers">
+    {% tmpl_loop layers %}
+    <div id="design-layer-{% tmpl_var id %}" class="designer-layer">
+      <span class="layer-name">{% tmpl_var name %}</span>
+      <span class="palette"></span>
+    </div>
+    {% /tmpl_loop %}
+  </div>
+  <div class="generated-image">
   </div>
   <div class="clear">&nbsp;</div>
 </div>
 <script type="text/javascript" src="js/jquery-1.6.2.js"></script>
 <script type="text/javascript" src="js/farbtastic.js"></script>
 <script type="text/javascript" src="js/design-center.js"></script>
+<script type="text/javascript">
+var dc = new DesignCenter();
+dc.init();
+</script>

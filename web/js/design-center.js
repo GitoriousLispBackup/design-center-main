@@ -17,12 +17,28 @@
 
 function DesignCenter()
 {
-  this.site = 'http://127.0.0.1:7888';
+  this.site = '/dc';
+  this.title = 'Design Center';
   this.createPictureSelector = function() {
-    $.getJSON(this.site + '/picture/list');
+    $.getJSON(this.site + '/picture/list', function(data) {
+		var list = $('#designer-picture-selector');
+		for (var i = 0; i < data.length; i++)
+		  $(list).append('<img src="' + data[i] + '" />');
+	      });
     $('#designer-picture-selector ul').append('<li>');
   };
   this.updateImage = function() {
     $.getJSON(this.site + '/picture/generate');
+  };
+  this.setPictureInfo = function() {
+    $.getJSON(this.site + '/picture/info', function(data) {
+		$('#design-center h2').html(data['title']);
+		if (data['description'])
+		  $('#design-center h3').html(data['description']);
+	      });
+  };
+  this.init = function() {
+    this.createPictureSelector();
+    this.setPictureInfo();
   };
 }
