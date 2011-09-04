@@ -29,7 +29,7 @@ layers which can be colourized and the user can select new pictures,
 set the colours of the layers, and see the resulting image.")
   (:use :common-lisp
 	:imago
-	:cl-json
+	:json
 	:hunchentoot)
   (:export :start-server))
 (in-package :design-center)
@@ -102,7 +102,7 @@ in *PICTURES*"
 (defun set-layer-color (session layer-index new-color)
   (setf (elt (session-layer-colors session) layer-index) new-color))
 
-(defun generate-image (session)
+(defun generate-image ()
   ;; run-program
   )
 
@@ -130,9 +130,10 @@ in *PICTURES*"
   (start-session))
 
 (define-easy-handler (generate-image :uri "/picture/generate") ()
-  "Handler for loading and writing the picture/layers being used by the given session."
+  "Handler for loading and writing the picture/layers being used by the given session. Saves the image to a random location and outputs the location as a JSON string."
   (start-session)
-  (setf (content-type*) "image/png")
+  (setf (content-type*) "application/json")
+  ;(generate-image (session-value
 )
 
 (define-easy-handler (thumbnail :uri "/thumbnail") (picture-id)
