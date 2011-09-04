@@ -19,6 +19,7 @@
 (ql:quickload '("imago"
 		"hunchentoot"
 		"md5"
+		"cl-json"
 		"swank"))
 
 (defpackage :design-center
@@ -28,6 +29,7 @@ layers which can be colourized and the user can select new pictures,
 set the colours of the layers, and see the resulting image.")
   (:use :common-lisp
 	:imago
+	:cl-json
 	:hunchentoot)
   (:export :start-server))
 (in-package :design-center)
@@ -118,11 +120,16 @@ in *PICTURES*"
   "Handler for changing which picture (and layers) are associated with the given session."
   (start-session))
 
+(define-easy-handler (pictures-list :uri "/picture/list") ()
+  "Handler for listing pictures in JSON form."
+  (start-session)
+  (setf (content-type*) "application/json"))
+
 (define-easy-handler (set-color :uri "/set") (layer color)
   "Handler for setting the color of a layer that's associated with the given session."
   (start-session))
 
-(define-easy-handler (generate-image :uri "/image") ()
+(define-easy-handler (generate-image :uri "/picture/generate") ()
   "Handler for loading and writing the picture/layers being used by the given session."
   (start-session)
   (setf (content-type*) "image/png")

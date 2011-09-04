@@ -1,4 +1,5 @@
-<link href="/css/designer-canvas.css" rel="stylesheet" />
+<link href="css/farbtastic.css" rel="stylesheet" />
+<link href="css/design-center.css" rel="stylesheet" />
 <title>Designer for {% tmpl_var designer-title %}</title>
 <div id="designer">
   {% tmpl_include "picture-selector.html" %}
@@ -8,9 +9,9 @@
   {% /tmpl_if %}
   {% tmpl_include "layers.html" %}
   <div id="designer-image">
-    <img src="{% tmpl_var site-url %}/image" />
   </div>
   <div class="clear">&nbsp;</div>
 </div>
-<script type="text/javascript" src="{% tmpl_var site-url %}/js/jquery-1.4.4.js"></script>
-<script type="text/javascript" src="{% tmpl_var site-url %}/js/designer.js"></script>
+<script type="text/javascript" src="js/jquery-1.6.2.js"></script>
+<script type="text/javascript" src="js/farbtastic.js"></script>
+<script type="text/javascript" src="js/design-center.js"></script>

@@ -14,3 +14,15 @@
 // along with Design Center.  If not, see <http://www.gnu.org/licenses/>.
 //
 // Copyright (C) 2011 Rudolf Olah <rolah@goaugust.com>
+
+function DesignCenter()
+{
+  this.site = 'http://127.0.0.1:7888';
+  this.createPictureSelector = function() {
+    $.getJSON(this.site + '/picture/list');
+    $('#designer-picture-selector ul').append('<li>');
+  };
+  this.updateImage = function() {
+    $.getJSON(this.site + '/picture/generate');
+  };
+}
