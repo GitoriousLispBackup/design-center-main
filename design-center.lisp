@@ -43,20 +43,6 @@ set the colours of the layers, and see the resulting image.")
 (defparameter *swank-port* 4444
   "The port used for remote interaction with SLIME.")
 
-(defstruct site
-  "A design center site has a base url where it is hosted, and a name.
-``pictures'' is a list of pictures available for designing.
-``picture-load-path'' is the path in which to search for pictures
-available for designing."
-  (base-url "http://localhost/" :type string)
-  (name "Site" :type string)
-  (pictures (list) :type (or nil list))
-  (picture-load-path (truename #p"./pictures/") :type pathname))
-
-(defvar *sites*
-  (list)
-  "List of design center sites. Each site may have its own domain name and pictures. Each site shares any pictures that are placed into *PICTURES* (which are loaded from *PICTURE-LOAD-PATH*). Sessions are shared between sites.")
-
 (defstruct picture
   thumbnail
   title
@@ -74,14 +60,15 @@ available for designing."
   (truename #p"./pictures/")
   "The path in which to search for pictures available for designing.")
 
-(defun register-picture (title path &optional (description ""))
+(defun add-picture (title path &optional (description ""))
   "Registers a picture as available for designing. Stores the picture
 in *PICTURES*"
-  (setf *pictures* (cons (make-picture :title title
-				       :description description
-				       :path path
-				       :images-load nil)
-			 *pictures*)))
+  (pushnew (make-picture :title title
+			 :description description
+			 :path (truename (merge-pathnames *picture-load-path* path))
+			 :images-loaded nil)
+	   *pictures*
+	   :test #'picture-path))
 
 (defun load-pictures (site)
   "Loads the thumbnails, base image, and layer images for all registered pictures."
@@ -93,50 +80,76 @@ in *PICTURES*"
 		collect (list layer (read-image (merge-pathnames (site-picture-load-path site)
 								 layer)))))))
 
-(defstruct site-session
-  (started-on (get-universal-time))
-  ip-address
-  picture
-  layer-colors)
+(defun color-transition (a b amount)
+  "Transition an IMAGO:COLOR from ``a'' to ''b'' by the specified ``amount''."
+  (flet ((transition (x y) (round (max 0 (min 255 (* amount (- y x)))))))
+    (imago:make-color (transition (imago:color-red a) (imago:color-red b))
+		      (transition (imago:color-green a) (imago:color-green b))
+		      (transition (imago:color-blue a) (imago:color-blue b)))))
 
-(defun set-layer-color (session layer-index new-color)
-  (setf (elt (session-layer-colors session) layer-index) new-color))
+(defun colorize-image (image color amount)
+  (imago:do-image-pixels (image old-color x y)
+    (if (> (imago:color-alpha old-color) 0)
+	(setf (imago:image-pixel image x y)
+	      (color-transition old-color color amount)))))
 
-(defun generate-image ()
-  ;; run-program
-  )
+(defun generate-image (image-input-filename image-output-filename &key (amount 1.0) (red 255) (green 255) (blue 255) (alpha 255))
+  (let ((im (imago:read-png image-input-filename)))
+    (colorize-image im (imago:make-color red green blue alpha) amount)
+    (imago:write-png im image-output-filename)
+    image-output-filename))
+
+(defun test-colorize (input-filename output-filename-fmt red green blue)
+  (loop for x in '(0.0 0.1 0.3 0.5 0.8 1.0 1.3 1.5 1.8 2.0)
+     do (generate-image input-filename
+			(format nil output-filename-fmt x)
+			:red red :blue blue :green green :amount x)))
 
 ;; Request handlers (a.k.a. views)
-(define-easy-handler (new-design :uri "/") ()
+(define-easy-handler (new-design :uri "/dc/test") ()
   (start-session)
   (setf (session-value 'picture) nil)
   (setf (session-value 'layer-colors) (list))
-  (setf (content-type*) "text/html"))
+  (setf (content-type*) "text/html")
+  (format nil "hello world"))
 
-(define-easy-handler (test-design-center :uri "/test") ()
-  (output-template #p"embedded-example.html" nil))
+(defun generate-test-page ()
+  (setf (content-type*) "text/html")
+  (format nil "hello world"))
 
-(define-easy-handler (change-picture :uri "/choose") (pic)
+(define-easy-handler (change-picture :uri "/dc/choose") (pic)
   "Handler for changing which picture (and layers) are associated with the given session."
   (start-session))
 
-(define-easy-handler (pictures-list :uri "/picture/list") ()
+(define-easy-handler (pictures-list :uri "/dc/picture/list") ()
   "Handler for listing pictures in JSON form."
   (start-session)
   (setf (content-type*) "application/json"))
 
-(define-easy-handler (set-color :uri "/set") (layer color)
+(define-easy-handler (picture-info :uri "/dc/picture/info") ()
+  "Handler for returning picture information in JSON form."
+  (start-session)
+  (setf (content-type*) "application/json")
+  (encode-json-plist-to-string '(:title "Title" :description "Description")))
+
+(define-easy-handler (picture-layers :uri "/dc/picture/layer/list") ()
+  "Handler for returning picture layers information in JSON form."
+  (start-session)
+  (setf (content-type*) "application/json")
+  (encode-json-alist-to-string '(("walls" . "Kitchen Walls"))))
+
+(define-easy-handler (set-color :uri "/dc/picture/layer/set") (layer color)
   "Handler for setting the color of a layer that's associated with the given session."
   (start-session))
 
-(define-easy-handler (generate-image :uri "/picture/generate") ()
+(define-easy-handler (generate-image :uri "/dc/picture/generate") ()
   "Handler for loading and writing the picture/layers being used by the given session. Saves the image to a random location and outputs the location as a JSON string."
   (start-session)
   (setf (content-type*) "application/json")
   ;(generate-image (session-value
 )
 
-(define-easy-handler (thumbnail :uri "/thumbnail") (picture-id)
+(define-easy-handler (thumbnail :uri "/dc/picture/thumbnail") (picture-id)
   "Handler that loads and resizes the base image of a picture."
   )
 
