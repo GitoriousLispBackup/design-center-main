@@ -37,8 +37,17 @@ function DesignCenter()
 		  $('#design-center h3').html(data['description']);
 	      });
   };
+  this.addLayer = function(id, name) {
+    $('#design-center .picture-layers').append('<div class="layer layer-' + id + '"><span class="layer-name">' + name + '</span><span class="palette"></span></div>');
+  };
+  this.loadLayers = function() {
+    $.getJSON(this.site + '/picture/layer/list', function(data) {
+		$.each(data, this.addLayer);
+	      });
+  };
   this.init = function() {
     this.createPictureSelector();
     this.setPictureInfo();
+    this.loadLayers();
   };
 }

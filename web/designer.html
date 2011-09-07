@@ -3,24 +3,13 @@
 <div id="design-center">
   <div class="picture-selector">
     <ul>
-      {% tmpl_loop pictures %}
-      <li><a href="{% tmpl_var site-url %}/choose/{% tmpl_var id %}">
-	  <img src="{% tmpl_var site-url %}/thumbnail/{% tmpl_var id %}"/>
-      </a></li>
-      {% /tmpl_loop %}
     </ul>
   </div>
   <div class="picture-info">
     <h2></h2>
     <h3></h3>
   </div>
-  <div class="layers">
-    {% tmpl_loop layers %}
-    <div id="design-layer-{% tmpl_var id %}" class="designer-layer">
-      <span class="layer-name">{% tmpl_var name %}</span>
-      <span class="palette"></span>
-    </div>
-    {% /tmpl_loop %}
+  <div class="picture-layers">
   </div>
   <div class="generated-image">
   </div>
