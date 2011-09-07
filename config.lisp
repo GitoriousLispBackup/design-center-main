@@ -10,4 +10,8 @@
 (in-package :design-center)
 (setf *http-port* 7888)
 (setf *swank-enabled* t)
+(setf *picture-load-path (truename "./pictures"))
 (format t "Swank starts on port: ~A~%" *swank-port*)
+
+;; Add pictures
+(add-picture "Kitchen Test" #p"kitchen-test" "This is a test image.")
