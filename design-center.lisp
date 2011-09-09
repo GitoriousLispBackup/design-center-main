@@ -196,5 +196,6 @@ the hue of the color on the HSV color space. Return type is CL-COLORS:HSV."
   (load config-file :verbose t)
   (if *swank-enabled*
       (swank:create-server :port *swank-port* :dont-close t))
-  (reset-session-secret)
+  ;; change this to whatever session secret you like
+  (setf hunchentoot:*session-secret* "{Rn2*%ZFw/'K+}-)7z@qW7mvb62S+h")
   (hunchentoot:start (make-instance 'hunchentoot:acceptor :port *http-port*)))
