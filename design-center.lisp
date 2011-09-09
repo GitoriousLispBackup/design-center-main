@@ -17,6 +17,7 @@
 
 (require 'quicklisp)
 (ql:quickload '("imago"
+		"cl-colors"
 		"hunchentoot"
 		"md5"
 		"cl-json"
@@ -77,33 +78,50 @@ in *PICTURES*"
        do (setf (picture-base-image p) (read-image (picture-path p)))
        (setf (picture-layers p)
 	     (loop for layer in (picture-layers p)
-		collect (list layer (read-image (merge-pathnames (site-picture-load-path site)
-								 layer)))))))
+		collect (list layer (read-image (merge-pathnames *picture-load-path* layer)))))))
 
-(defun color-transition (a b amount)
-  "Transition an IMAGO:COLOR from ``a'' to ''b'' by the specified ``amount''."
-  (flet ((transition (x y) (round (max 0 (min 255 (* amount (- y x)))))))
-    (imago:make-color (transition (imago:color-red a) (imago:color-red b))
-		      (transition (imago:color-green a) (imago:color-green b))
-		      (transition (imago:color-blue a) (imago:color-blue b)))))
+(defun make-rgb (c)
+  (make-instance 'cl-colors:rgb
+		 :red (imago:color-red c)
+		 :green (imago:color-green c)
+		 :blue (imago:color-blue c)))
 
-(defun colorize-image (image color amount)
+(defgeneric ->imago (color)
+  (:documentation "Converts a color to an IMAGO color (the color value produced by #'IMAGO:MAKE-COLOR)."))
+
+(defmethod ->imago ((color cl-colors:rgb))
+  (imago:make-color (round (cl-colors:red color))
+		    (round (cl-colors:green color))
+		    (round (cl-colors:blue color))))
+
+(defmethod ->imago ((color cl-colors:hsv))
+  (->imago (cl-colors:->rgb color)))
+
+(defun color-transition (a b)
+  "Transition a CL-COLORS:RGB color from ``a'' to ''b'' by changing
+the hue of the color on the HSV color space. Return type is CL-COLORS:HSV."
+  (let ((hsv-a (cl-colors:->hsv (make-rgb a)))
+	(hsv-b (cl-colors:->hsv (make-rgb b))))
+    (make-instance 'cl-colors:hsv
+		   :hue (cl-colors:hue hsv-b)
+		   :saturation (cl-colors:saturation hsv-a)
+		   :value (cl-colors:value hsv-a))))
+
+(defun colorize-image (image color)
   (imago:do-image-pixels (image old-color x y)
     (if (> (imago:color-alpha old-color) 0)
-	(setf (imago:image-pixel image x y)
-	      (color-transition old-color color amount)))))
+	(setf (imago:image-pixel image x y) (->imago (color-transition old-color color))))))
 
-(defun generate-image (image-input-filename image-output-filename &key (amount 1.0) (red 255) (green 255) (blue 255) (alpha 255))
+(defun generate-image (image-input-filename image-output-filename &key (red 255) (green 255) (blue 255) (alpha 255))
   (let ((im (imago:read-png image-input-filename)))
-    (colorize-image im (imago:make-color red green blue alpha) amount)
+    (colorize-image im (imago:make-color red green blue alpha))
     (imago:write-png im image-output-filename)
     image-output-filename))
 
-(defun test-colorize (input-filename output-filename-fmt red green blue)
-  (loop for x in '(0.0 0.1 0.3 0.5 0.8 1.0 1.3 1.5 1.8 2.0)
-     do (generate-image input-filename
-			(format nil output-filename-fmt x)
-			:red red :blue blue :green green :amount x)))
+(defun test-colorize (input-filename output-filename red green blue)
+  (generate-image input-filename
+		  output-filename
+		  :red red :blue blue :green green))
 
 ;; Request handlers (a.k.a. views)
 (define-easy-handler (new-design :uri "/dc/test") ()
