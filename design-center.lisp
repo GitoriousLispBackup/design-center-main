@@ -61,6 +61,14 @@ set the colours of the layers, and see the resulting image.")
   (truename #p"./pictures/")
   "The path in which to search for pictures available for designing.")
 
+(defparameter *generated-image-path*
+  (truename #p"./web/images/generated/")
+  "The path where generated images are stored.")
+
+(defparameter *generated-image-url*
+  "/images/generated/"
+  "The URL where generated images are stored.")
+
 (defun add-picture (title path &optional (description ""))
   "Registers a picture as available for designing. Stores the picture
 in *PICTURES*"
