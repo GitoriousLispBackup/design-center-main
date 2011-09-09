@@ -71,11 +71,17 @@ in *PICTURES*"
 	   *pictures*
 	   :test #'picture-path))
 
-(defun load-pictures (site)
+(defun load-picture (picture)
+  "Loads the thumbnail, base image, and layer images for the picture.
+  The layer list is replaced with a list that includes the layer image
+  data as the third element."
+  )
+
+(defun load-pictures ()
   "Loads the thumbnails, base image, and layer images for all registered pictures."
-  (loop for p in (site-pictures site)
-       when (not (picture-images-loaded p))
-       do (setf (picture-base-image p) (read-image (picture-path p)))
+  (loop for p in *pictures*
+     when (not (picture-images-loaded p))
+     do (setf (picture-base-image p) (read-image (picture-path p)))
        (setf (picture-layers p)
 	     (loop for layer in (picture-layers p)
 		collect (list layer (read-image (merge-pathnames *picture-load-path* layer)))))))
