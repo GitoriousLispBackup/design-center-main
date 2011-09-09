@@ -143,7 +143,7 @@ the hue of the color on the HSV color space. Return type is CL-COLORS:HSV."
   (setf (session-value 'picture) nil)
   (setf (session-value 'layer-colors) (list))
   (setf (content-type*) "text/html")
-  (format nil "hello world"))
+  (format nil "hello world: ~a" (session-value 'id)))
 
 (defun generate-test-page ()
   (setf (content-type*) "text/html")
