@@ -149,32 +149,31 @@ the hue of the color on the HSV color space. Return type is CL-COLORS:HSV."
   (setf (content-type*) "text/html")
   (format nil "hello world"))
 
-(defmacro define-ajax (name uri vars documentation &body body)
+(defmacro define-ajax (name vars uri documentation &body body)
   `(define-easy-handler (ajax-,name :uri ,uri) ,vars
      ,(concatenate 'string "AJAX handler. " documentation)
      (start-session)
      (setf (content-type*) "application/json")
      ,@body))
 
-(define-ajax change-picture "/dc/choose" (pic)
+(define-ajax change-picture (pic)
+  "/dc/choose"
   "Change which picture (and layers) are associated with the given session."
   (setf (session-value 'picture) nil))
 
-(define-easy-handler (pictures-list :uri "/dc/picture/list") ()
-  "Handler for listing pictures in JSON form."
-  (start-session)
-  (setf (content-type*) "application/json"))
+(define-ajax pictures-list ()
+  "/dc/picture/list"
+  "Lists all pictures available for selection."
+  nil)
 
-(define-easy-handler (picture-info :uri "/dc/picture/info") ()
-  "Handler for returning picture information in JSON form."
-  (start-session)
-  (setf (content-type*) "application/json")
+(define-ajax picture-info ()
+  "/dc/picture/info"
+  "Returns a hash-table of picture information."
   (encode-json-plist-to-string '(:title "Title" :description "Description")))
 
-(define-easy-handler (picture-layers :uri "/dc/picture/layer/list") ()
-  "Handler for returning picture layers information in JSON form."
-  (start-session)
-  (setf (content-type*) "application/json")
+(define-ajax picture-layers ()
+  "/dc/picture/layer/list"
+  "List all " ;; TODO: finishing converting define-easy-handler to define-ajax
   (encode-json-alist-to-string '(("walls" . "Kitchen Walls"))))
 
 (define-easy-handler (set-color :uri "/dc/picture/layer/set") (layer color)
