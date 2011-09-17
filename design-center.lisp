@@ -45,7 +45,6 @@ set the colours of the layers, and see the resulting image.")
   "The port used for remote interaction with SLIME.")
 
 (defstruct picture
-  thumbnail
   title
   description
   path
@@ -72,13 +71,19 @@ in *PICTURES*"
 	   :test #'picture-path))
 
 (defun load-picture (picture)
-  "Loads the thumbnail, base image, and layer images for the picture.
-  The layer list is replaced with a list that includes the layer image
-  data as the third element."
-  )
+  "Loads the base image, and layer images for the picture. The base
+image is replaced with a list where the first element is the path and
+the second element is the image data.
+
+For each layer in the layers list, the loaded image data of the layer
+is appended to that layer."
+  (with-slots (base-image layers images-loaded) picture
+    (setf base-image (cons base-image (read-png base-image)))
+    (setf images-loaded t)
+    picture))
 
 (defun load-pictures ()
-  "Loads the thumbnails, base image, and layer images for all registered pictures."
+  "Loads the base images, and layer images for all registered pictures."
   (loop for p in *pictures*
      when (not (picture-images-loaded p))
      do (setf (picture-base-image p) (read-image (picture-path p)))
@@ -179,9 +184,13 @@ the hue of the color on the HSV color space. Return type is CL-COLORS:HSV."
   ;(generate-image (session-value
 )
 
-(define-easy-handler (thumbnail :uri "/dc/picture/thumbnail") (picture-id)
+(define-easy-handler (thumbnail :uri "/dc/picture/thumbnail") (picture-id height)
   "Handler that loads and resizes the base image of a picture."
-  )
+  (setf (content-type*) "image/png")
+  (let* ((im (elt *pictures* picture-id))
+	 (ratio (/ height (image-height im))))
+    (with-output-to-string (stream)
+      (write-png (resize im (round (* ratio (image-width im))) height) stream))))
 
 (defun start-server (&optional (config-file "config.lisp"))
   (load config-file :verbose t)
