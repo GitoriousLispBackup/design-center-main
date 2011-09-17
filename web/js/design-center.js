@@ -19,14 +19,6 @@ function DesignCenter()
 {
   this.site = '/dc';
   this.title = 'Design Center';
-  this.createPictureSelector = function() {
-    $.getJSON(this.site + '/picture/list', function(data) {
-		var list = $('#designer-picture-selector');
-		for (var i = 0; i < data.length; i++)
-		  $(list).append('<img src="' + data[i] + '" />');
-	      });
-    $('#designer-picture-selector ul').append('<li>');
-  };
   this.updateImage = function() {
     $.getJSON(this.site + '/picture/generate');
   };
@@ -45,9 +37,19 @@ function DesignCenter()
 		$.each(data, this.addLayer);
 	      });
   };
+  this.addThumbnail = function(data) {
+
+  };
+  this.loadThumbnails = function() {
+    $.getJSON(this.site + '/picture/thumbnail/list', function(data) {
+		$.each(data, function(i, thumbnail) {
+			 $('#design-center .picture-selector ul').append('<li class="thumbnail"><img src="' + thumbnail['url'] + '"/></li>');
+		       });
+	      });
+  };
   this.init = function() {
-    this.createPictureSelector();
     this.setPictureInfo();
-    this.loadLayers();
+    //this.loadLayers();
+    this.loadThumbnails();
   };
 }
