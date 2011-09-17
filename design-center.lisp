@@ -16,7 +16,7 @@
 ;; Copyright (C) 2011 Rudolf Olah <rolah@goaugust.com>
 
 (require 'quicklisp)
-(ql:quickload '("imago"
+(ql:quickload '("opticl"
 		"cl-colors"
 		"hunchentoot"
 		"md5"
@@ -29,7 +29,7 @@ picture of a room with new colours. Each picture is separated into
 layers which can be colourized and the user can select new pictures,
 set the colours of the layers, and see the resulting image.")
   (:use :common-lisp
-	:imago
+	:opticl
 	:json
 	:hunchentoot)
   (:export :start-server))
@@ -61,6 +61,14 @@ set the colours of the layers, and see the resulting image.")
   "The path in which to search for pictures available for designing.")
 
 (defun add-picture (title path &optional (description ""))
+(defvar *generated-image-directory*
+  "/tmp"
+  "The directory where generated images are stored.")
+
+(defvar *generated-image-url*
+  "/dc/generated-images/"
+  "The URL where generated images are located.")
+
   "Registers a picture as available for designing. Stores the picture
 in *PICTURES*"
   (pushnew (make-picture :title title
