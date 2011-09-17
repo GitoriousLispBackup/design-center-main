@@ -51,8 +51,7 @@ set the colours of the layers, and see the resulting image.")
   description
   path
   (layers (list))
-  base-image
-  images-loaded)
+  base-image)
 
 (defvar *pictures*
   (list)
