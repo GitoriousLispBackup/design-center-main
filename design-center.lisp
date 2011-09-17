@@ -30,6 +30,7 @@ layers which can be colourized and the user can select new pictures,
 set the colours of the layers, and see the resulting image.")
   (:use :common-lisp
 	:opticl
+	:cl-colors
 	:json
 	:hunchentoot)
   (:export :start-server))
@@ -105,16 +106,17 @@ is appended to that layer."
 		 :green (imago:color-green c)
 		 :blue (imago:color-blue c)))
 
-(defgeneric ->imago (color)
-  (:documentation "Converts a color to an IMAGO color (the color value produced by #'IMAGO:MAKE-COLOR)."))
+(defgeneric ->opticl (color)
+  (:documentation "Converts a color to an OPTICL color (the color values consumed by OPTICL."))
 
-(defmethod ->imago ((color cl-colors:rgb))
-  (imago:make-color (round (cl-colors:red color))
-		    (round (cl-colors:green color))
-		    (round (cl-colors:blue color))))
+(defmethod ->opticl ((color rgba))
+  (values (round (red color))
+	  (round (green color))
+	  (round (blue color))
+	  (round (alpha color))))
 
-(defmethod ->imago ((color cl-colors:hsv))
-  (->imago (cl-colors:->rgb color)))
+(defmethod ->opticl ((color hsv))
+  (->opticl (->rgb color)))
 
 (defun color-transition (a b)
   "Transition a CL-COLORS:RGB color from ``a'' to ''b'' by changing
