@@ -173,14 +173,17 @@ the hue of the color on the HSV color space. Return type is CL-COLORS:HSV."
   "List all " ;; TODO: finishing converting define-easy-handler to define-ajax
   (encode-json-alist-to-string '(("walls" . "Kitchen Walls"))))
 
-(define-easy-handler (set-color :uri "/dc/picture/layer/set") (layer color)
-  "Handler for setting the color of a layer that's associated with the given session."
-  (start-session))
+(define-ajax set-color (layer color)
+  "/dc/picture/layer/set"
+  "Set the color of a layer that's associated with the given session."
+  nil)
 
-(define-easy-handler (generate-image :uri "/dc/picture/generate") ()
-  "Handler for loading and writing the picture/layers being used by the given session. Saves the image to a random location and outputs the location as a JSON string."
-  (start-session)
-  (setf (content-type*) "application/json")
+(define-ajax generate-image ()
+  "/dc/picture/generate"
+  "Loads and writes the picture/layers being used by the given
+session. Saves the image to a random location and outputs the location
+as a JSON string."
+  (encode-json-to-string (concatenate 'string *generated-image-url* (session-value 'whatever)))
   ;(generate-image (session-value
 )
 
