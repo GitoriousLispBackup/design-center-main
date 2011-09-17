@@ -144,10 +144,11 @@ the hue of the color on the HSV color space. Return type is CL-COLORS:HSV."
      (setf (content-type*) "application/json")
      ,@body))
 
-(define-ajax change-picture (pic)
-  "/dc/choose"
+(define-ajax select-picture (id)
+  "/dc/picture/select"
   "Change which picture (and layers) are associated with the given session."
-  (setf (session-value 'picture) nil))
+  (setf (session-value 'picture) (find (parse-integer id) *pictures* :key #'picture-id))
+  (encode-json-to-string (picture-id (session-value 'picture))))
 
 (define-ajax pictures-list ()
   "/dc/picture/list"
