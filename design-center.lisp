@@ -153,12 +153,20 @@ the hue of the color on the HSV color space. Return type is CL-COLORS:HSV."
 (define-ajax pictures-list ()
   "/dc/picture/list"
   "Lists all pictures available for selection."
-  nil)
+  (encode-json-to-string
+   (loop for p in *pictures*
+      collect (with-slots (id title description) p
+		`((:id . ,id)
+		  (:title . ,title)
+		  (:description . ,description))))))
 
 (define-ajax picture-info ()
   "/dc/picture/info"
   "Returns a hash-table of picture information."
-  (encode-json-plist-to-string '(:title "Title" :description "Description")))
+  (let ((p (session-value 'picture)))
+    (encode-json-to-string `((:id . ,(picture-id p))
+			     (:title . ,(picture-title p))
+			     (:description . ,(picture-description p))))))
 
 (define-ajax picture-layers ()
   "/dc/picture/layer/list"
