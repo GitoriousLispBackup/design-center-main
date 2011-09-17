@@ -144,6 +144,13 @@ the hue of the color on the HSV color space. Return type is CL-COLORS:HSV."
      (setf (content-type*) "application/json")
      ,@body))
 
+(defmethod encode-json ((p picture) &optional stream)
+  (encode-json `((:id . ,(picture-id p))
+		 (:title . ,(picture-title p))
+		 (:description . ,(picture-description p)))
+	       stream))
+
+
 (define-ajax select-picture (id)
   "/dc/picture/select"
   "Change which picture (and layers) are associated with the given session."
@@ -153,20 +160,13 @@ the hue of the color on the HSV color space. Return type is CL-COLORS:HSV."
 (define-ajax pictures-list ()
   "/dc/picture/list"
   "Lists all pictures available for selection."
-  (encode-json-to-string
-   (loop for p in *pictures*
-      collect (with-slots (id title description) p
-		`((:id . ,id)
-		  (:title . ,title)
-		  (:description . ,description))))))
+  (encode-json-to-string *pictures*))
 
 (define-ajax picture-info ()
   "/dc/picture/info"
   "Returns a hash-table of picture information."
   (let ((p (session-value 'picture)))
-    (encode-json-to-string `((:id . ,(picture-id p))
-			     (:title . ,(picture-title p))
-			     (:description . ,(picture-description p))))))
+    (encode-json-to-string p)))
 
 (define-ajax picture-layers ()
   "/dc/picture/layer/list"
