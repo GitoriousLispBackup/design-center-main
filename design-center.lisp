@@ -137,17 +137,6 @@ the hue of the color on the HSV color space. Return type is CL-COLORS:HSV."
     image-output-filename))
 
 ;; Request handlers (a.k.a. views)
-(define-easy-handler (new-design :uri "/dc/test") ()
-  (start-session)
-  (setf (session-value 'picture) nil)
-  (setf (session-value 'layer-colors) (list))
-  (setf (content-type*) "text/html")
-  (format nil "hello world: ~a" (session-value 'id)))
-
-(defun generate-test-page ()
-  (setf (content-type*) "text/html")
-  (format nil "hello world"))
-
 (defmacro define-ajax (name vars uri documentation &body body)
   `(define-easy-handler (,name :uri ,uri) ,vars
      ,(concatenate 'string "AJAX handler. " documentation)
