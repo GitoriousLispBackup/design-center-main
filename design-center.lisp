@@ -46,6 +46,7 @@ set the colours of the layers, and see the resulting image.")
   "The port used for remote interaction with SLIME.")
 
 (defstruct picture
+  (id (random 123091238))
   title
   description
   path
