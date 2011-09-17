@@ -147,7 +147,7 @@ the hue of the color on the HSV color space. Return type is CL-COLORS:HSV."
   (format nil "hello world"))
 
 (defmacro define-ajax (name vars uri documentation &body body)
-  `(define-easy-handler (ajax-,name :uri ,uri) ,vars
+  `(define-easy-handler (,name :uri ,uri) ,vars
      ,(concatenate 'string "AJAX handler. " documentation)
      (start-session)
      (setf (content-type*) "application/json")
