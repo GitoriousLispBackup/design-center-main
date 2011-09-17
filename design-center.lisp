@@ -122,28 +122,24 @@ is appended to that layer."
 (defun color-transition (a b)
   "Transition a CL-COLORS:RGB color from ``a'' to ''b'' by changing
 the hue of the color on the HSV color space. Return type is CL-COLORS:HSV."
-  (let ((hsv-a (cl-colors:->hsv (make-rgb a)))
-	(hsv-b (cl-colors:->hsv (make-rgb b))))
-    (make-instance 'cl-colors:hsv
-		   :hue (cl-colors:hue hsv-b)
-		   :saturation (cl-colors:saturation hsv-a)
-		   :value (cl-colors:value hsv-a))))
+  (let ((hsv-a (->hsv a))
+	(hsv-b (->hsv b)))
+    (make-instance 'hsv
+		   :hue (hue hsv-b)
+		   :saturation (saturation hsv-a)
+		   :value (value hsv-a))))
 
 (defun colorize-image (image color)
-  (imago:do-image-pixels (image old-color x y)
-    (if (> (imago:color-alpha old-color) 0)
-	(setf (imago:image-pixel image x y) (->imago (color-transition old-color color))))))
+  (with-image-bounds (height width) image
+    (loop for i below height
+       do (loop for j below width
+	     do (setf (pixel image i j) (->opticl (color-transition (pixel image i j) color)))))))
 
 (defun generate-image (image-input-filename image-output-filename &key (red 255) (green 255) (blue 255) (alpha 255))
-  (let ((im (imago:read-png image-input-filename)))
-    (colorize-image im (imago:make-color red green blue alpha))
-    (imago:write-png im image-output-filename)
+  (let ((im (read-png-file image-input-filename)))
+    (colorize-image im (make-instance 'rgba :red red :green green :blue blue :alpha alpha))
+    (write-png-file im image-output-filename)
     image-output-filename))
-
-(defun test-colorize (input-filename output-filename red green blue)
-  (generate-image input-filename
-		  output-filename
-		  :red red :blue blue :green green))
 
 ;; Request handlers (a.k.a. views)
 (define-easy-handler (new-design :uri "/dc/test") ()
