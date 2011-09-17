@@ -61,50 +61,46 @@ set the colours of the layers, and see the resulting image.")
   (truename #p"./pictures/")
   "The path in which to search for pictures available for designing.")
 
-(defun add-picture (title path &optional (description ""))
 (defvar *generated-image-directory*
-  "/tmp"
+  "/home/omouse/Web/DesignCenter/web/images/generated"
   "The directory where generated images are stored.")
 
 (defvar *generated-image-url*
-  "/dc/generated-images/"
+  "/images/generated"
   "The URL where generated images are located.")
 
+(defun add-picture (title path description)
   "Registers a picture as available for designing. Stores the picture
 in *PICTURES*"
-  (pushnew (make-picture :title title
-			 :description description
-			 :path (truename (merge-pathnames *picture-load-path* path))
-			 :images-loaded nil)
-	   *pictures*
-	   :test #'picture-path))
+  (setf *pictures* (cons (make-picture :title title
+				       :description description
+				       :path (truename (merge-pathnames *picture-load-path* path)))
+			 *pictures*)))
 
-(defun load-picture (picture)
+(defun load-picture (picture thumbnail-height)
   "Loads the base image, and layer images for the picture. The base
-image is replaced with a list where the first element is the path and
-the second element is the image data.
+image is set to the loaded image data. Creates the thumbnail image in
+*GENERATED-IMAGE-DIRECTORY* using the THUMBNAIL-HEIGHT to determine
+the height and width of the thumbnail image.
 
 For each layer in the layers list, the loaded image data of the layer
 is appended to that layer."
-  (with-slots (base-image layers images-loaded) picture
-    (setf base-image (cons base-image (read-png base-image)))
-    (setf images-loaded t)
-    picture))
+  (setf (picture-base-image picture) (read-png-file (merge-pathnames (picture-path picture) "base.png")))
+  ;; Create the thumbnail
+  (with-image-bounds (height width) (picture-base-image picture)
+    (write-png-file
+     (format nil "~A/~A_thumbnail.png" *generated-image-directory* (picture-id picture))
+     (resize-image (picture-base-image picture)
+		   thumbnail-height
+		   (round (* (/ thumbnail-height height) width))))))
 
-(defun load-pictures ()
-  "Loads the base images, and layer images for all registered pictures."
+(defun load-pictures (&optional (thumbnail-height 100))
+  "Loads the base images, and layer images for all registered
+pictures. The thumbnail image for each picture is generated,
+THUMBNAIL-HEIGHT is used to set the height of each thumbnail image,
+and the width is adjusted based on that."
   (loop for p in *pictures*
-     when (not (picture-images-loaded p))
-     do (setf (picture-base-image p) (read-image (picture-path p)))
-       (setf (picture-layers p)
-	     (loop for layer in (picture-layers p)
-		collect (list layer (read-image (merge-pathnames *picture-load-path* layer)))))))
-
-(defun make-rgb (c)
-  (make-instance 'cl-colors:rgb
-		 :red (imago:color-red c)
-		 :green (imago:color-green c)
-		 :blue (imago:color-blue c)))
+     do (load-picture p thumbnail-height)))
 
 (defgeneric ->opticl (color)
   (:documentation "Converts a color to an OPTICL color (the color values consumed by OPTICL."))
