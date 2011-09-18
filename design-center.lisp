@@ -33,6 +33,7 @@ set the colours of the layers, and see the resulting image.")
 	:cl-colors
 	:json
 	:hunchentoot)
+  (:import-from :hunchentoot :session-id)
   (:export :start-server))
 (in-package :design-center)
 
@@ -136,6 +137,9 @@ the hue of the color on the HSV color space. Return type is CL-COLORS:HSV."
     (write-png-file im image-output-filename)
     image-output-filename))
 
+(defun picture-url (picture)
+  (format nil "~A/~A_~A.png" *generated-image-url* (picture-id picture) (session-id *session*)))
+
 ;; Request handlers (a.k.a. views)
 (defmacro define-ajax (name vars uri documentation &body body)
   `(define-easy-handler (,name :uri ,uri) ,vars
@@ -147,7 +151,8 @@ the hue of the color on the HSV color space. Return type is CL-COLORS:HSV."
 (defmethod encode-json ((p picture) &optional stream)
   (encode-json `((:id . ,(picture-id p))
 		 (:title . ,(picture-title p))
-		 (:description . ,(picture-description p)))
+		 (:description . ,(picture-description p))
+		 (:url . ,(picture-url p)))
 	       stream))
 
 (define-ajax select-picture (id)
