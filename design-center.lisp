@@ -138,6 +138,10 @@ the hue of the color on the HSV color space. Return type is CL-COLORS:HSV."
     image-output-filename))
 
 (defun picture-url (picture)
+  "Returns a string which specifies where a generated image of the
+PICTURE can be found. The url begins with *GENERATED-IMAGE-URL* and
+uses the PICTURE-ID, and SESSION-ID for the filename. The image format
+is PNG."
   (format nil "~A/~A_~A.png" *generated-image-url* (picture-id picture) (session-id *session*)))
 
 ;; Request handlers (a.k.a. views)
