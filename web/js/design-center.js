@@ -22,8 +22,8 @@ function DesignCenter()
   this.updateImage = function() {
     $.getJSON(this.site + '/picture/generate');
   };
-  this.setPictureInfo = function() {
-    $.getJSON(this.site + '/picture/info', function(data) {
+  this.selectPicture = function(id) {
+    $.getJSON(this.site + '/picture/select', {'id':id}, function(data) {
 		$('#design-center h2').html(data['title']);
 		if (data['description'])
 		  $('#design-center h3').html(data['description']);
