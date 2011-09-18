@@ -33,23 +33,29 @@ function DesignCenter()
     $('#design-center .picture-layers').append('<div class="layer layer-' + id + '"><span class="layer-name">' + name + '</span><span class="palette"></span></div>');
   };
   this.loadLayers = function() {
-    $.getJSON(this.site + '/picture/layer/list', function(data) {
-		$.each(data, this.addLayer);
+    var self = this;
+    $.getJSON(self.site + '/picture/layer/list', function(data) {
+		$.each(data, self.addLayer);
 	      });
   };
   this.addThumbnail = function(data) {
 
   };
   this.loadThumbnails = function() {
-    $.getJSON(this.site + '/picture/thumbnail/list', function(data) {
+    var self = this;
+    $.getJSON(self.site + '/picture/thumbnail/list', function(data) {
 		$.each(data, function(i, thumbnail) {
-			 $('#design-center .picture-selector ul').append('<li class="thumbnail"><img src="' + thumbnail['url'] + '"/></li>');
+			 var thumb = $('<li class="thumbnail"></li>');
+			 var image = $('<img src="' + thumbnail['url'] + '"/>');
+			 $(image).click(function() {
+					  self.selectPicture(thumbnail['id']);
+					});
+			 $(thumb).append(image);
+			 $('#design-center .picture-selector ul').append(thumb);
 		       });
 	      });
   };
   this.init = function() {
-    this.setPictureInfo();
-    //this.loadLayers();
     this.loadThumbnails();
   };
 }
